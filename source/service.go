@@ -562,10 +562,18 @@ func (sc *serviceSource) extractNodePortTargets(svc *v1.Service) (endpoint.Targe
 		externalIPs endpoint.Targets
 		nodes       []*v1.Node
 		err         error
+		rsyncSvc    bool
 	)
 
-	switch svc.Spec.ExternalTrafficPolicy {
-	case v1.ServiceExternalTrafficPolicyTypeLocal:
+	svcname := svc.Name
+	log.Infof("Working on svc %s", svcname)
+	if strings.Contains(svcname, "rsync") {
+		rsyncSvc = true
+	} else {
+		rsyncSvc = false
+	}
+
+	if svc.Spec.ExternalTrafficPolicy == v1.ServiceExternalTrafficPolicyTypeLocal || rsyncSvc {
 		nodesMap := map[*v1.Node]struct{}{}
 		labelSelector, err := metav1.ParseToLabelSelector(labels.Set(svc.Spec.Selector).AsSelectorPreValidated().String())
 		if err != nil {
@@ -593,7 +601,7 @@ func (sc *serviceSource) extractNodePortTargets(svc *v1.Service) (endpoint.Targe
 				}
 			}
 		}
-	default:
+	} else {
 		nodes, err = sc.nodeInformer.Lister().List(labels.Everything())
 		if err != nil {
 			return nil, err
