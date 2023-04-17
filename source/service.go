@@ -565,9 +565,9 @@ func (sc *serviceSource) extractNodePortTargets(svc *v1.Service) (endpoint.Targe
 		rsyncSvc    bool
 	)
 
-	svcname := svc.Name
-	log.Infof("Working on svc %s", svcname)
-	if strings.Contains(svcname, "rsync") {
+	svcName := svc.Name
+	log.Infof("Working on svc %s", svcName)
+	if strings.Contains(svcName, "rsync") {
 		rsyncSvc = true
 	} else {
 		rsyncSvc = false
